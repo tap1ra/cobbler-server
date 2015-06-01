@@ -1,0 +1,15 @@
+# 必要なパッケージをまとめて入れる
+# selinuxモジュールを使用するため、libselinux-pythonを入れてる 
+- name: Installing Required Packages
+  yum: name={{ item }} state=latest
+  with_items:
+    - epel-release
+    - libselinux-python
+
+# SElinuxを止めて自動起動しなくしている
+- name: disabled SELinux
+  selinux: state=disabled
+
+# iptablesもとめておく
+- name: disabled iptables
+  service: name=iptables state=stopped enabled=no

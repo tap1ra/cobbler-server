@@ -1,0 +1,61 @@
+# 必要なパッケージをまとめて入れる
+- name: Installing Required Packages
+  yum: name={{ item }} state=latest
+  with_items:
+    - cobbler
+    - debmirror
+    - pykickstart
+    - dnsmasq
+
+# 後の設定ファイルで使うための環境情報をregisterしておく
+- name: get static ip
+  shell: /sbin/ifconfig eth1|grep inet|awk '{print $2}'|cut -d ':' -f2
+  register: eth1_static_ip
+
+- name: configure settings
+  template: src=settings.j2 dest=/etc/cobbler/settings owner=root group=root mode=0644
+  notify: restart cobbler
+
+- name: configure modules.conf
+  template: src=modules.conf.j2 dest=/etc/cobbler/modules.conf owner=root group=root mode=0644
+  notify: restart cobbler
+
+- name: configure dnsmasq.template
+  template: src=dnsmasq.template.j2 dest=/etc/cobbler/dnsmasq.template owner=root group=root mode=0644
+  notify: restart cobbler
+
+# xinetdのrsyncとtftpを有効化
+- name: config xinetd rsync
+  lineinfile: >
+    dest=/etc/xinetd.d/rsync
+    backup=yes
+    backrefs=yes
+    regexp='disable.*=\syes'
+    line='disable = no'
+  notify: restart cobbler
+
+- name: config xinetd tftp
+  lineinfile: >
+    dest=/etc/xinetd.d/tftp
+    backup=yes
+    backrefs=yes
+    regexp='disable.*=\syes'
+    line='disable = no'
+  notify: restart cobbler
+
+- name: cobbler get-loader
+  command: /usr/bin/cobbler get-loaders
+
+- name: service up
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - cobblerd
+    - httpd
+    - xinetd
+    - dnsmasq
+ 
+- name: cobbler sync
+  command: /usr/bin/cobbler sync
+
+- name: cobbler restart
+  service: name=cobblerd state=restarted

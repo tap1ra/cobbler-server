@@ -1,0 +1,11 @@
+cobbler_manage_dhcp: 1
+cobbler_manage_dns: 1
+# サーバの固定IPを指定
+cobbler_next_server: 192.168.20.2
+cobbler_server: 192.168.20.2
+# $ openssl passwd -1で生成。下記は「cobbler」
+cobbler_default_password_crypted: $1$FBpFkrpD$fu5NLQhZwDDb4Zsc4mf9s.
+cobbler_dhcp_start_ip: 192.168.20.10
+cobbler_dhcp_end_ip: 192.168.20.100
+cobbler_dns_module: manage_dnsmasq
+cobbler_dhcp_module: manage_dnsmasq

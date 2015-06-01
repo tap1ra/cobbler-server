@@ -1,0 +1,7 @@
+- name: Install Cobbler
+  hosts: all
+  sudo: yes
+
+  roles:
+    - common
+    - cobbler
